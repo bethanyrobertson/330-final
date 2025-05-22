@@ -2,14 +2,14 @@
 # Design System API
 ## updates - 5/21
 
-Design tokens exported and added as a JSON (data folder)
-First pass at routes and models done
+Design tokens exported and added as a JSON (data folder)</br>
+First pass at routes and models done</br>
 
-Major items to do: 
-Tests
-Middleware
-Front end
-Deploy
+Major items to do: </br>
+Tests</br>
+Middleware</br>
+Front end</br>
+Deploy</br>
 
 ## 1. A description of the scenario your project is operating in.<br/>
 
