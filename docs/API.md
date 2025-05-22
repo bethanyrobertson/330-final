@@ -1,254 +1,51 @@
-# Design System API Documentation
+##Design system API documentation
 
-This document provides comprehensive information about the Design System API endpoints, authentication, and usage.
+Step-by-Step Process for Adding a Component
 
-## Base URL
 
-```
-http://localhost:5000/api
-```
 
-## Authentication
+Step 1: Basic Information
 
-The API uses JSON Web Tokens (JWT) for authentication. To access protected routes, include the JWT token in the Authorization header:
+Click the "New Component" button in the Components Library
+Fill in the basic details:
 
-```
-Authorization: Bearer YOUR_TOKEN_HERE
-```
+Name: The component's unique identifier (e.g., "Datepicker")
+Type: Select from predefined categories (e.g., form, navigation, layout)
+Description: Brief explanation of the component's purpose
+Style Guide: Associate with an existing style guide
+Tags: Keywords for easier searching and categorization
 
-### Authentication Endpoints
 
-#### Register User
 
-```
-POST /auth/register
-```
+Step 2: Variants & Properties
 
-Register a new user.
+Define the default variant properties
+Add additional variants if needed (e.g., primary, secondary, ghost)
+For each variant, specify:
 
-**Request Body:**
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
+Visual preview (upload or create in the interface)
+Properties (name, type, default value)
+States (hover, active, disabled, etc.)
 
-**Response:**
-```json
-{
-  "success": true,
-  "token": "YOUR_JWT_TOKEN"
-}
-```
 
-To register as an admin, include the `role` and `adminSecret` fields:
 
-```json
-{
-  "name": "Admin User",
-  "email": "admin@example.com",
-  "password": "password123",
-  "role": "admin",
-  "adminSecret": "YOUR_ADMIN_SECRET"
-}
-```
+Step 3: Documentation
 
-#### Login User
+Add usage guidelines:
 
-```
-POST /auth/login
-```
+When to use this component
+When not to use it
+Accessibility considerations
 
-Login with existing credentials.
 
-**Request Body:**
-```json
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
+Provide code examples in different formats (React, HTML/CSS)
+Link to related components
+Add any implementation notes for developers
 
-**Response:**
-```json
-{
-  "success": true,
-  "token": "YOUR_JWT_TOKEN"
-}
-```
 
-#### Get Current User
 
-```
-GET /auth/me
-```
+Step 4: Review & Submit
 
-Get the profile of the currently authenticated user.
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "60a1b2c3d4e5f6g7h8i9j0k",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "user",
-    "createdAt": "2023-01-01T00:00:00.000Z"
-  }
-}
-```
-
-#### Update User Details
-
-```
-PUT /auth/updatedetails
-```
-
-Update user name or email.
-
-**Request Body:**
-```json
-{
-  "name": "John Smith",
-  "email": "johnsmith@example.com"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "60a1b2c3d4e5f6g7h8i9j0k",
-    "name": "John Smith",
-    "email": "johnsmith@example.com",
-    "role": "user",
-    "createdAt": "2023-01-01T00:00:00.000Z"
-  }
-}
-```
-
-#### Update Password
-
-```
-PUT /auth/updatepassword
-```
-
-Update user password.
-
-**Request Body:**
-```json
-{
-  "currentPassword": "password123",
-  "newPassword": "newpassword123"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "token": "NEW_JWT_TOKEN"
-}
-```
-
-#### Logout
-
-```
-GET /auth/logout
-```
-
-Logout the current user.
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {}
-}
-```
-
-## Projects
-
-Projects are collections of design tokens and components.
-
-### Project Endpoints
-
-#### Get All Projects
-
-```
-GET /projects
-```
-
-Get all projects belonging to the current user. Admins can view all projects.
-
-**Query Parameters:**
-- `search`: Search by name, description, or tags
-- `status`: Filter by status (draft, published, archived)
-- `select`: Comma-separated list of fields to include
-- `sort`: Sort by field (prefix with - for descending)
-- `page`: Page number (default: 1)
-- `limit`: Results per page (default: 10)
-
-**Response:**
-```json
-{
-  "success": true,
-  "count": 1,
-  "pagination": {
-    "next": {
-      "page": 2,
-      "limit": 10
-    }
-  },
-  "total": 15,
-  "data": [
-    {
-      "_id": "60a1b2c3d4e5f6g7h8i9j0k",
-      "name": "My Design System",
-      "description": "Corporate design system",
-      "slug": "my-design-system",
-      "tags": ["corporate", "web"],
-      "status": "published",
-      "tokenTheme": "light",
-      "version": "1.0.0",
-      "user": "user_id",
-      "createdAt": "2023-01-01T00:00:00.000Z",
-      "updatedAt": "2023-01-02T00:00:00.000Z"
-    }
-  ]
-}
-```
-
-#### Get Single Project
-
-```
-GET /projects/:id
-```
-
-Get a single project by ID.
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "60a1b2c3d4e5f6g7h8i9j0k",
-    "name": "My Design System",
-    "description": "Corporate design system",
-    "slug": "my-design-system",
-    "tags": ["corporate", "web"],
-    "status": "published",
-    "tokenTheme": "light",
-    "version": "1.0.0",
-    "user": "user_id",
-    "createdAt": "2023-01-01T00:00:00.000Z",
-    "updatedAt": "2023-01-02T00:00:00.000Z"
-  }
-}
-```
-
-#### Create
+Review all component details
+Submit the component to the design system
+The component is now available for the entire team

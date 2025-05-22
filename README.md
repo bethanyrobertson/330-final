@@ -1,6 +1,15 @@
 
 # Design System API
-## (either 1 fairly complex component or a few simpler ones)
+## updates - 5/21
+
+Design tokens exported and added as a JSON (data folder)
+First pass at routes and models done
+
+Major items to do: 
+Tests
+Middleware
+Front end
+Deploy
 
 ## 1. A description of the scenario your project is operating in.<br/>
 

@@ -1,27 +1,22 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Please add a name'],
     trim: true,
-    maxlength: [50, 'Name can not be more than 50 characters']
+    maxlength: [50, 'Name cannot be more than 50 characters']
   },
   email: {
     type: String,
     required: [true, 'Please add an email'],
     unique: true,
+    lowercase: true,
     match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email'
     ]
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
   },
   password: {
     type: String,
@@ -29,22 +24,39 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
-  createdAt: {
-    type: Date,
-    default: Date.now
+  role: {
+    type: String,
+    enum: ['admin', 'designer', 'developer'],
+    default: 'developer'
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
+  active: {
+    type: Boolean,
+    default: true
+  },
+  lastLogin: {
+    type: Date
+  },
+  preferences: {
+    theme: {
+      type: String,
+      enum: ['light', 'dark', 'auto'],
+      default: 'auto'
+    },
+    notifications: {
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true }
+    }
   }
 }, {
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  timestamps: true
 });
 
-// Create index for email (for faster login queries)
-UserSchema.index({ email: 1 });
-
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function(next) {
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     next();
   }
@@ -53,23 +65,15 @@ UserSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Sign JWT and return
-UserSchema.methods.getSignedJwtToken = function() {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
-  });
-};
-
-// Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+// match user entered password to hashed password in database
+userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// delete projects when a user is deleted
-UserSchema.pre('remove', async function(next) {
-  await this.model('Project').deleteMany({ user: this._id });
-  next();
-});
+// last login
+userSchema.methods.updateLastLogin = function() {
+  this.lastLogin = new Date();
+  return this.save();
+};
 
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);

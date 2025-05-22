@@ -1,107 +1,138 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
-const TokenSchema = new mongoose.Schema({
+const styleGuideSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please add a token name'],
+    required: [true, 'Please add a style guide name'],
     trim: true,
     maxlength: [100, 'Name cannot be more than 100 characters']
   },
-  path: {
+  slug: {
     type: String,
-    required: [true, 'Please add a token path'],
-    trim: true
+    unique: true
   },
-  category: {
+  version: {
     type: String,
-    required: [true, 'Please add a category'],
-    enum: ['color', 'typography', 'spacing', 'effect', 'grid', 'shape', 'other'],
-  },
-  value: {
-    type: mongoose.Schema.Types.Mixed,
-    required: [true, 'Please add a token value']
+    required: [true, 'Please add a version'],
+    trim: true,
+    match: [/^\d+\.\d+\.\d+$/, 'Version must be in format x.y.z']
   },
   description: {
     type: String,
-    maxlength: [200, 'Description cannot be more than 200 characters']
+    maxlength: [500, 'Description cannot be more than 500 characters']
   },
-  deprecated: {
-    type: Boolean,
-    default: false
+  // Legacy color structure for backward compatibility
+  colors: {
+    primary: [String],
+    secondary: [String],
+    accent: [String],
+    neutral: [String],
+    semantic: {
+      success: [String],
+      warning: [String],
+      error: [String],
+      info: [String]
+    }
   },
-  tags: {
-    type: [String],
-    default: []
+  // Legacy typography structure
+  typography: {
+    fontFamilies: [String],
+    fontSizes: {
+      type: Map,
+      of: String
+    },
+    fontWeights: {
+      type: Map,
+      of: String
+    },
+    lineHeights: {
+      type: Map,
+      of: String
+    }
   },
-  project: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Project',
-    required: true
+  spacing: [Number],
+  borderRadius: {
+    type: Map,
+    of: String
   },
-  user: {
-    type: mongoose.Schema.ObjectId,
+  shadows: {
+    type: Map,
+    of: String
+  },
+  breakpoints: {
+    type: Map,
+    of: String
+  },
+  // New design token summary
+  tokenSummary: {
+    totalTokens: { type: Number, default: 0 },
+    categories: {
+      type: Map,
+      of: Number,
+      default: new Map()
+    },
+    lastImport: Date
+  },
+  // Style guide metadata
+  status: {
+    type: String,
+    enum: ['draft', 'published', 'archived'],
+    default: 'draft'
+  },
+  visibility: {
+    type: String,
+    enum: ['private', 'team', 'public'],
+    default: 'team'
+  },
+  tags: [String],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  team: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    role: {
+      type: String,
+      enum: ['owner', 'editor', 'viewer'],
+      default: 'viewer'
+    }
+  }],
+  isActive: {
+    type: Boolean,
+    default: true
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+ {
+  timestamps: true
 });
 
-// Create indexes 
-TokenSchema.index({ name: 1, project: 1 }, { unique: true });
-TokenSchema.index({ path: 1, project: 1 }, { unique: true });
-TokenSchema.index({ category: 1 });
-TokenSchema.index({ 'tags': 1 });
-TokenSchema.index({ deprecated: 1 });
-//  search functionality
-TokenSchema.index({ name: 'text', path: 'text', description: 'text', tags: 'text' });
-
-
-// generate CSS variable
-TokenSchema.methods.toCssVariable = function() {
-  const prefix = this.category === 'color' ? 'color' : this.category;
-  const name = this.name.replace(/\./g, '-').toLowerCase();
-  
-  let value = '';
-  if (typeof this.value === 'object' && this.value.value) {
-    value = this.value.value;
-  } else if (typeof this.value === 'string' || typeof this.value === 'number') {
-    value = this.value;
-  } else {
-    value = JSON.stringify(this.value);
+// Create slug before saving
+styleGuideSchema.pre('save', function(next) {
+  if (this.isModified('name')) {
+    this.slug = slugify(this.name, { lower: true, strict: true });
   }
-  
-  return `--${prefix}-${name}: ${value};`;
-};
+  next();
+});
 
-// Aggregation
-TokenSchema.statics.getCategoryCounts = async function(projectId) {
-  const categoryCounts = await this.aggregate([
-    {
-      $match: { project: new mongoose.Types.ObjectId(projectId) }
-    },
-    {
-      $group: {
-        _id: '$category',
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $project: {
-        category: '$_id',
-        count: 1,
-        _id: 0
-      }
-    }
-  ]);
-  
-  return categoryCounts;
-};
+// Create indexes
+styleGuideSchema.index({ name: 'text', description: 'text', tags: 'text' });
+styleGuideSchema.index({ slug: 1 });
+styleGuideSchema.index({ status: 1, visibility: 1 });
+styleGuideSchema.index({ createdBy: 1 });
 
-module.exports = mongoose.model('Token', TokenSchema);
+// Virtual for component count
+styleGuideSchema.virtual('componentCount', {
+  ref: 'Component',
+  localField: '_id',
+  foreignField: 'styleGuideId',
+  count: true
+});
+
+// Ensure virtual fields are serialised
+styleGuideSchema.set('toJSON', { virtuals: true });
+
+module.exports = mongoose.model('StyleGuide', styleGuideSchema);

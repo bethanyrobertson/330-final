@@ -1,0 +1,39 @@
+const Component = require('../models/Component');
+const StyleGuide = require('../models/StyleGuide');
+const Des// package.json
+{
+  "name": "designhub-api",
+  "version": "1.0.0",
+  "description": "Design system API for managing components, style guides, and design tokens",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "seed": "node scripts/seedData.js",
+    "seed:dev": "NODE_ENV=development node scripts/seedData.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "joi": "^17.9.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "multer": "^1.4.5-lts.1",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
